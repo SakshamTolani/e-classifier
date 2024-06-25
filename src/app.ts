@@ -3,6 +3,7 @@ import session from 'express-session';
 import passport from 'passport';
 import { configurePassport } from './config/passportConfig';
 import authRoutes from './routes/authRoutes';
+import { emailAnalysisQueue } from './services/queueService';
 
 const app = express();
 
@@ -30,5 +31,11 @@ app.get('/', (req, res) => {
     res.send('Not logged in');
   }
 });
+
+process.on('SIGTERM', async () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    await emailAnalysisQueue.close();
+    process.exit(0);
+  });
 
 export default app;
